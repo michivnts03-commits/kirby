@@ -1,169 +1,130 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <!-- Evita el zoom al tocar dos botones rápido en iPhone y Android -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Game Boy Color NFC</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            /* Bloquea gestos del navegador y permite presionar múltiples teclas a la vez */
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRIS 3D presenta GAME BOY NFC</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #000000;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Pantalla inicial idéntica a la imagen */
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100dvh;
+      background: radial-gradient(circle, #2a1b3d 0%, #0a0a0a 100%);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+      text-align: center;
+    }
 
-        html, body {
-            width: 100%;
-            height: 100dvh;
-            background-color: #000000;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-        }
+    #start-overlay h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      color: #9b4dca;
+    }
 
-        /* Pantalla de inicio centrada para desbloquear audio en iOS/Safari */
-        #start-overlay {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100dvh;
-            background: radial-gradient(circle, #2a1b3d 0%, #0a0a0a 100%);
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
-            text-align: center;
-        }
+    #start-overlay p {
+      font-size: 14px;
+      color: #aaaaaa;
+      margin-bottom: 30px;
+    }
 
-        #start-overlay h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-            color: #9b4dca; /* Morado clásico de Game Boy Color */
-        }
+    #btn-start {
+      padding: 18px 40px;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      background-color: #7b2cbf;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(123, 44, 191, 0.45);
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
 
-        #start-overlay p {
-            font-size: 14px;
-            color: #aaaaaa;
-            margin-bottom: 30px;
-        }
-
-        #btn-start {
-            padding: 18px 40px;
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            background-color: #7b2cbf;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(123, 44, 191, 0.45);
-            transition: transform 0.1s ease, background-color 0.2s ease;
-        }
-
-        #btn-start:active {
-            transform: scale(0.95);
-            background-color: #5a189a;
-        }
-
-        /* Contenedor del emulador a pantalla completa */
-        #game-wrapper {
-            width: 100%;
-            height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #game {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+    #btn-start:active {
+      transform: scale(0.95);
+      background-color: #5a189a;
+    }
+    
+    #game-container {
+      width: 100vw;
+      height: 100dvh;
+      max-width: 600px;
+      position: relative
+    }
+    #game {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Pantalla inicial obligatoria para iOS -->
-    <div id="start-overlay">
-        <h1>PRIS 3D GAME BOY COLOR</h1>
-        <p>Presiona el botón para iniciar la consola</p>
-        <button id="btn-start">START GAME</button>
-    </div>
+    <!-- Pantalla de inicio -->
+  <div id="start-overlay">
+    <h1>PRIS 3D GAME BOY</h1>
+    <p>Presiona el botón para iniciar la consola</p>
+    <button id="btn-start">START GAME</button>
+  </div>
 
-    <!-- Contenedor donde se cargará el emulador -->
-    <div id="game-wrapper">
-        <div id="game"></div>
-    </div>
+  <!-- Contenedor donde se dibuja el emulador -->
+  <div id="game-container">
+    <div id="game"></div>
+  </div>
 
-    <script>
-        // Bloquea el gesto de "pellizcar para hacer zoom" en iOS Safari al usar 2 dedos
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
+  <!-- Configuración de EmulatorJS -->
+  <script>
+document.getElementById('btn-start').addEventListener('click', function (){
+    // 1. Quita la pantalla inicial
+document.getElementById('start-overlay').style.display = 'none';
 
-        document.getElementById('btn-start').addEventListener('click', function () {
-            // 1. Ocultar la pantalla de inicio
-            document.getElementById('start-overlay').style.display = 'none';
+   // 2. Activa el audio en Iphone
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (AudioCtx) new AudioCtx().resume();
+  
+    // 1. Dónde se montará el juego
+    EJS_player = '#game';
 
-            // 2. Desbloquear el sistema de audio en iPhone (Safari)
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const audioCtx = new AudioContext();
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume();
-                    }
-                }
-            } catch (e) {
-                console.log("Audio iniciado");
-            }
+    // 2. Consola que emula:
+    // Usa 'nes' para Nintendo NES o 'gb' para Game Boy clásica
+    EJS_core = 'gb'; 
 
-            // 3. Configurar el emulador (EmulatorJS) para Game Boy / Game Boy Color
-            window.EJS_player = '#game';
-            
-            // NÚCLEO: 'gb' carga el core Gambatte, que ejecuta tanto .gbc como .gb a todo color
-            window.EJS_core = 'gb'; 
-            
-            // RUTA DE TU JUEGO: Coincide con la carpeta roms y el archivo .gbc en minúsculas (sin barra inicial)
-            window.EJS_gameUrl = 'Kirby.gb'; 
-            
-            // Ruta de los archivos del motor (CDN oficial estable)
-            window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/ [cdn.emulatorjs.org]';
-            
-            // Opciones ideales para móvil
-            window.EJS_startOnLoaded = true;
-            window.EJS_language = 'es-ES';
-            window.EJS_Buttons = {
-                playPause: true,
-                restart: true,
-                mute: true,
-                settings: false,
-                fullscreen: false, // Evita conflictos con el viewport de iOS
-                saveState: true,
-                loadState: true,
-                screenRecord: false,
-                gamepad: true,
-                cheat: false,
-                volume: true,
-                quickSave: false,
-                quickLoad: false,
-                screenshot: false,
-                cacheManager: false
-            };
+    // 3. Nombre EXACTO del archivo ROM que subiste a GitHub
+    EJS_gameUrl = 'Kirby.gb'; 
 
-            // 4. Cargar el script del emulador dinámicamente tras el toque del usuario
-            const script = document.createElement('script');
-            script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js [cdn.emulatorjs.org]';
-            document.body.appendChild(script);
-        });
+    // 4. Servidor que carga el motor del emulador
+    EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+
+  EJS_language = 'es-ES';
+    EJS_startOnLoaded = true;
+  const script = document.createElement('script');
+script.src='https://cdn.emulatorjs.org/stable/data/loader.js';
+    document.body.appendChild(script);
+  });
     </script>
+
 </body>
 </html>
